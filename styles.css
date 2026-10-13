@@ -1,0 +1,31 @@
+.clc-progress {
+	color: var(--text-muted);
+	margin-bottom: var(--size-4-2);
+}
+
+.clc-status {
+	font-weight: var(--font-semibold);
+}
+
+.clc-pass .clc-status {
+	color: var(--text-success);
+}
+
+.clc-mismatch .clc-status,
+.clc-incomplete .clc-status {
+	color: var(--text-error);
+}
+
+.clc-rule,
+.clc-where {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.clc-unmatched li {
+	margin-bottom: var(--size-4-2);
+}
+
+.clc-text {
+	white-space: pre-wrap;
+}

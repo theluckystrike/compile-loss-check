@@ -1,0 +1,82 @@
+[
+	{
+		"feature": "check-result",
+		"caption": "The check of Manuscript.md: one lost paragraph, one quote change, one dropped repeat and the research notes, each with its scene and line.",
+		"note": "Index.md",
+		"eval": "(async () => { app.plugins.plugins['compile-loss-check'].pro.signOut();  const out = await app.plugins.plugins['compile-loss-check'].runWithModal('Compile Loss Check/Index.md', ['Compile Loss Check/Manuscript.md']); window.__clcReport = out.reportPath; return out.runs.map((r) => r.result.status).join(','); })()",
+		"wait": 900,
+		"after": "(async () => { document.querySelectorAll('.modal-container').forEach(() => document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }))); const f = window.__clcReport ? app.vault.getFileByPath(window.__clcReport) : null; if (f) await app.vault.delete(f); window.__clcReport = null; app.plugins.plugins['compile-loss-check'].pro.signOut(); app.plugins.plugins['compile-loss-check'].settings.profiles = []; app.plugins.plugins['compile-loss-check'].settings.history = []; return 'ok'; })()"
+	},
+	{
+		"feature": "pick-index",
+		"caption": "The command lists the notes with a longform property. Then you select the compiled note.",
+		"note": "Index.md",
+		"commands": [
+			"compile-loss-check:check"
+		],
+		"wait": 700,
+		"after": "(async () => { document.querySelectorAll('.modal-container').forEach(() => document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }))); const f = window.__clcReport ? app.vault.getFileByPath(window.__clcReport) : null; if (f) await app.vault.delete(f); window.__clcReport = null; app.plugins.plugins['compile-loss-check'].pro.signOut(); app.plugins.plugins['compile-loss-check'].settings.profiles = []; app.plugins.plugins['compile-loss-check'].settings.history = []; return 'ok'; })()"
+	},
+	{
+		"feature": "report",
+		"caption": "The saved Markdown report links each unmatched paragraph to its scene and line.",
+		"note": "Index.md",
+		"eval": "(async () => { app.plugins.plugins['compile-loss-check'].pro.signOut(); const out = await app.plugins.plugins['compile-loss-check'].runCheck('Compile Loss Check/Index.md', ['Compile Loss Check/Manuscript.md']); window.__clcReport = out.reportPath; await app.plugins.plugins['compile-loss-check'].openPath(out.reportPath); return out.reportPath; })()",
+		"wait": 900,
+		"after": "(async () => { app.workspace.getMostRecentLeaf()?.detach(); const f = window.__clcReport ? app.vault.getFileByPath(window.__clcReport) : null; if (f) await app.vault.delete(f); window.__clcReport = null; return 'ok'; })()",
+		"zoom": 0.85
+	},
+	{
+		"feature": "incomplete",
+		"caption": "An index that names a scene with no note gives an incomplete check, not a pass.",
+		"note": "Broken index.md",
+		"eval": "(async () => { app.plugins.plugins['compile-loss-check'].pro.signOut();  const out = await app.plugins.plugins['compile-loss-check'].runWithModal('Compile Loss Check/Broken index.md', ['Compile Loss Check/Manuscript.md']); window.__clcReport = out.reportPath; return out.runs.map((r) => r.result.status).join(','); })()",
+		"wait": 900,
+		"after": "(async () => { document.querySelectorAll('.modal-container').forEach(() => document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }))); const f = window.__clcReport ? app.vault.getFileByPath(window.__clcReport) : null; if (f) await app.vault.delete(f); window.__clcReport = null; app.plugins.plugins['compile-loss-check'].pro.signOut(); app.plugins.plugins['compile-loss-check'].settings.profiles = []; app.plugins.plugins['compile-loss-check'].settings.history = []; return 'ok'; })()"
+	},
+	{
+		"feature": "profile",
+		"caption": "Pro: one profile checks two compiled notes and skips the research notes scene.",
+		"note": "Index.md",
+		"eval": "(async () => { app.plugins.plugins['compile-loss-check'].pro.opts.http = async () => ({ status: 200, json: { data: { viewer: { login: 'demo-reader' }, user: { sponsorshipForViewerAsSponsor: { isActive: true, isOneTimePayment: false, tier: { name: '$5 a month', monthlyPriceInCents: 500 } } } } } }); app.secretStorage.setSecret('compile-loss-check-github-token', 'gho_' + '0'.repeat(36)); await app.plugins.plugins['compile-loss-check'].pro.refreshNow(); await app.plugins.plugins['compile-loss-check'].saveProfile({ name: 'Lighthouse drafts', indexPath: 'Compile Loss Check/Index.md', outputPaths: ['Compile Loss Check/Manuscript.md', 'Compile Loss Check/Manuscript ebook.md'], excludeTexts: [], excludePaths: ['Compile Loss Check/Scenes/Research notes.md'] }); const out = await app.plugins.plugins['compile-loss-check'].runProfile(app.plugins.plugins['compile-loss-check'].settings.profiles[0]); window.__clcReport = out.reportPath; document.querySelectorAll('.notice').forEach((n) => n.remove()); return 'ok'; })()",
+		"wait": 900,
+		"after": "(async () => { document.querySelectorAll('.modal-container').forEach(() => document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }))); const f = window.__clcReport ? app.vault.getFileByPath(window.__clcReport) : null; if (f) await app.vault.delete(f); window.__clcReport = null; app.plugins.plugins['compile-loss-check'].pro.signOut(); app.plugins.plugins['compile-loss-check'].settings.profiles = []; app.plugins.plugins['compile-loss-check'].settings.history = []; return 'ok'; })()",
+		"zoom": 0.85
+	},
+	{
+		"feature": "settings",
+		"caption": "Settings after sign in: the Pro section with the GitHub account, and the report folder.",
+		"eval": "(async () => { app.plugins.plugins['compile-loss-check'].pro.opts.http = async () => ({ status: 200, json: { data: { viewer: { login: 'demo-reader' }, user: { sponsorshipForViewerAsSponsor: { isActive: true, isOneTimePayment: false, tier: { name: '$5 a month', monthlyPriceInCents: 500 } } } } } }); app.secretStorage.setSecret('compile-loss-check-github-token', 'gho_' + '0'.repeat(36)); await app.plugins.plugins['compile-loss-check'].pro.refreshNow(); app.setting.open(); app.setting.openTabById('compile-loss-check'); await new Promise((r) => setTimeout(r, 500)); return 'ok'; })()",
+		"after": "app.setting.close(); app.plugins.plugins['compile-loss-check'].pro.signOut(); 'ok'"
+	},
+	{
+		"feature": "compile-loss-check",
+		"caption": "Open the index, run the check, read the report, then read the source scene.",
+		"frames": [
+			{
+				"note": "Index.md",
+				"eval": "(async () => { app.plugins.plugins['compile-loss-check'].pro.signOut(); return 'ok'; })()",
+				"hold": 1500
+			},
+			{
+				"commands": [
+					"compile-loss-check:check"
+				],
+				"hold": 1500
+			},
+			{
+				"eval": "(async () => { document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true })); const out = await app.plugins.plugins['compile-loss-check'].runWithModal('Compile Loss Check/Index.md', ['Compile Loss Check/Manuscript.md']); window.__clcReport = out.reportPath; return 'ok'; })()",
+				"hold": 2200
+			},
+			{
+				"eval": "(async () => { document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true })); await app.plugins.plugins['compile-loss-check'].openPath(window.__clcReport); return 'ok'; })()",
+				"hold": 2200
+			},
+			{
+				"eval": "(async () => { const f = window.__clcReport ? app.vault.getFileByPath(window.__clcReport) : null; if (f) await app.vault.delete(f); window.__clcReport = null; return 'ok'; })()",
+				"hold": 500,
+				"note": "Scenes/Keeper.md"
+			}
+		]
+	}
+]

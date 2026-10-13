@@ -1,0 +1,851 @@
+{
+ "slug": "compile-loss-check",
+ "module": "compile-loss-check/src/check",
+ "function": "checkCompile",
+ "note": "checkCompile cases: args = [{indexPath, indexText, outputPath, outputText, files: {path: text}, changed?, exclusions?: {texts, paths}}]; expected holds a subset of {status, errors, scenes, checked, outputParagraphs, excluded, unmatched}. Each unmatched row is [text, missing, sourceCount, outputCount, [\"path:line\"], uncertain, hint]. Cases with a \"function\" field call that export of the same module (parseSceneOrder, reportPath, splitParagraphs) and compare the whole result.",
+ "cases": [
+  {
+   "name": "one scene with one matching paragraph",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\n"
+     },
+     "outputText": "Alpha.\n"
+    }
+   ],
+   "expected": {
+    "status": "pass",
+    "errors": [],
+    "scenes": [
+     "Novel/Scenes/A.md"
+    ],
+    "checked": 1,
+    "outputParagraphs": 1,
+    "unmatched": []
+   }
+  },
+  {
+   "name": "a missing middle paragraph gives its path and line",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\n\nMiddle.\n\nOmega.\n"
+     },
+     "outputText": "Alpha.\n\nOmega.\n"
+    }
+   ],
+   "expected": {
+    "status": "mismatch",
+    "checked": 3,
+    "unmatched": [
+     [
+      "Middle.",
+      1,
+      1,
+      0,
+      [
+       "Novel/Scenes/A.md:3"
+      ],
+      false,
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "name": "body rules are not frontmatter",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Body text.\n\n---\n\nLost text.\n\n---\n"
+     },
+     "outputText": "Body text.\n"
+    }
+   ],
+   "expected": {
+    "status": "mismatch",
+    "checked": 2,
+    "unmatched": [
+     [
+      "Lost text.",
+      1,
+      1,
+      0,
+      [
+       "Novel/Scenes/A.md:5"
+      ],
+      false,
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "name": "only the initial YAML block is ignored",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "---\ntitle: A\ntags: [draft]\n---\nBody one.\n\nBody two.\n"
+     },
+     "outputText": "Body one.\n\nBody two.\n"
+    }
+   ],
+   "expected": {
+    "status": "pass",
+    "errors": [],
+    "checked": 2,
+    "unmatched": []
+   }
+  },
+  {
+   "name": "line numbers count the frontmatter lines",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "---\ntitle: A\n---\nKept.\n\nDropped.\n"
+     },
+     "outputText": "Kept.\n"
+    }
+   ],
+   "expected": {
+    "status": "mismatch",
+    "unmatched": [
+     [
+      "Dropped.",
+      1,
+      1,
+      0,
+      [
+       "Novel/Scenes/A.md:6"
+      ],
+      false,
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "name": "a repeated paragraph with one copy lost is uncertain",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Echo.\n\nOther.\n\nEcho.\n"
+     },
+     "outputText": "Echo.\n\nOther.\n"
+    }
+   ],
+   "expected": {
+    "status": "mismatch",
+    "checked": 3,
+    "unmatched": [
+     [
+      "Echo.",
+      1,
+      2,
+      1,
+      [
+       "Novel/Scenes/A.md:1",
+       "Novel/Scenes/A.md:5"
+      ],
+      true,
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "name": "a repeated paragraph with each copy lost is certain",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Echo.\n\nOther.\n\nEcho.\n"
+     },
+     "outputText": "Other.\n"
+    }
+   ],
+   "expected": {
+    "status": "mismatch",
+    "unmatched": [
+     [
+      "Echo.",
+      2,
+      2,
+      0,
+      [
+       "Novel/Scenes/A.md:1",
+       "Novel/Scenes/A.md:5"
+      ],
+      false,
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "name": "repeated text across two scenes lists both places",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A, B]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Echo.\n",
+      "Novel/Scenes/B.md": "Echo.\n"
+     },
+     "outputText": "Echo.\n"
+    }
+   ],
+   "expected": {
+    "status": "mismatch",
+    "unmatched": [
+     [
+      "Echo.",
+      1,
+      2,
+      1,
+      [
+       "Novel/Scenes/A.md:1",
+       "Novel/Scenes/B.md:1"
+      ],
+      true,
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "name": "nested scenes are read in list order",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A, [B], C]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "One.\n",
+      "Novel/Scenes/B.md": "Two.\n",
+      "Novel/Scenes/C.md": "Three.\n"
+     },
+     "outputText": "One.\n\nTwo.\n\nThree.\n"
+    }
+   ],
+   "expected": {
+    "status": "pass",
+    "errors": [],
+    "scenes": [
+     "Novel/Scenes/A.md",
+     "Novel/Scenes/B.md",
+     "Novel/Scenes/C.md"
+    ],
+    "checked": 3,
+    "unmatched": []
+   }
+  },
+  {
+   "name": "a missing scene note makes the check incomplete",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A, B]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "One.\n"
+     },
+     "outputText": "One.\n"
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "errors": [
+     "The scene \"B\" has no note at \"Novel/Scenes/B.md\"."
+    ],
+    "scenes": [
+     "Novel/Scenes/A.md"
+    ],
+    "unmatched": []
+   }
+  },
+  {
+   "name": "a child list without a parent makes the check incomplete",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [[B], A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "One.\n",
+      "Novel/Scenes/B.md": "Two.\n"
+     },
+     "outputText": "One.\n\nTwo.\n"
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "errors": [
+     "The scene list has a child list without a parent scene at position 1."
+    ],
+    "scenes": [
+     "Novel/Scenes/A.md"
+    ]
+   }
+  },
+  {
+   "name": "curly quotes in the output are a strict mismatch with a hint",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "She said \"go\".\n"
+     },
+     "outputText": "She said “go”.\n"
+    }
+   ],
+   "expected": {
+    "status": "mismatch",
+    "unmatched": [
+     [
+      "She said \"go\".",
+      1,
+      1,
+      0,
+      [
+       "Novel/Scenes/A.md:1"
+      ],
+      false,
+      "quotes"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "joined paragraphs are a strict mismatch with a hint",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "First part.\n\nSecond part.\n"
+     },
+     "outputText": "First part. Second part.\n"
+    }
+   ],
+   "expected": {
+    "status": "mismatch",
+    "unmatched": [
+     [
+      "First part.",
+      1,
+      1,
+      0,
+      [
+       "Novel/Scenes/A.md:1"
+      ],
+      false,
+      "inside"
+     ],
+     [
+      "Second part.",
+      1,
+      1,
+      0,
+      [
+       "Novel/Scenes/A.md:3"
+      ],
+      false,
+      "inside"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "a scene that changed during the scan stops the check",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\n"
+     },
+     "outputText": "",
+     "changed": [
+      "Novel/Scenes/A.md"
+     ]
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "errors": [
+     "\"Novel/Scenes/A.md\" changed during the scan. Run a new scan."
+    ],
+    "scenes": [],
+    "checked": 0,
+    "unmatched": []
+   }
+  },
+  {
+   "name": "a single-note project is unsupported input",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: single\n  title: Novel\n---\nText.\n",
+     "files": {},
+     "outputText": "Text.\n"
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "errors": [
+     "This index is a single-note project. Only scenes projects are supported."
+    ],
+    "checked": 0
+   }
+  },
+  {
+   "name": "an index without a longform property is unsupported input",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\ntitle: Novel\n---\n",
+     "files": {},
+     "outputText": ""
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "errors": [
+     "The index frontmatter has no longform property."
+    ]
+   }
+  },
+  {
+   "name": "an index without frontmatter is unsupported input",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "Just text.\n",
+     "files": {},
+     "outputText": ""
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "errors": [
+     "The index note has no frontmatter."
+    ]
+   }
+  },
+  {
+   "name": "whitespace is normalized inside a paragraph",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha   beta\n  gamma\t delta\n"
+     },
+     "outputText": "Alpha beta gamma delta\n"
+    }
+   ],
+   "expected": {
+    "status": "pass",
+    "checked": 1,
+    "unmatched": []
+   }
+  },
+  {
+   "name": "Windows line endings split paragraphs",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\r\nlongform:\r\n  format: scenes\r\n  title: Novel\r\n  sceneFolder: Scenes\r\n  scenes: [A]\r\n---\r\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\r\n\r\nBeta.\r\n"
+     },
+     "outputText": "Alpha.\r\n"
+    }
+   ],
+   "expected": {
+    "status": "mismatch",
+    "unmatched": [
+     [
+      "Beta.",
+      1,
+      1,
+      0,
+      [
+       "Novel/Scenes/A.md:3"
+      ],
+      false,
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "name": "thematic breaks are skipped",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\n\n***\n\nBeta.\n\n- - -\n"
+     },
+     "outputText": "Alpha.\n\nBeta.\n"
+    }
+   ],
+   "expected": {
+    "status": "pass",
+    "checked": 2,
+    "unmatched": []
+   }
+  },
+  {
+   "name": "extra compiled paragraphs do not fail the check",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\n"
+     },
+     "outputText": "# Chapter one\n\nAlpha.\n\nThe end.\n"
+    }
+   ],
+   "expected": {
+    "status": "pass",
+    "checked": 1,
+    "outputParagraphs": 3,
+    "unmatched": []
+   }
+  },
+  {
+   "name": "a profile text exclusion skips a paragraph",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\n\nTODO   fix this.\n"
+     },
+     "outputText": "Alpha.\n",
+     "exclusions": {
+      "texts": [
+       "TODO fix this."
+      ]
+     }
+    }
+   ],
+   "expected": {
+    "status": "pass",
+    "checked": 1,
+    "excluded": 1,
+    "unmatched": []
+   }
+  },
+  {
+   "name": "a profile path exclusion skips a scene",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A, Notes]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\n",
+      "Novel/Scenes/Notes.md": "Research.\n\nMore research.\n"
+     },
+     "outputText": "Alpha.\n",
+     "exclusions": {
+      "paths": [
+       "Novel/Scenes/Notes.md"
+      ]
+     }
+    }
+   ],
+   "expected": {
+    "status": "pass",
+    "checked": 1,
+    "excluded": 2,
+    "unmatched": []
+   }
+  },
+  {
+   "name": "a scene name two times makes the check incomplete",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A, A]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\n"
+     },
+     "outputText": "Alpha.\n"
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "errors": [
+     "The scene \"A\" is in the scene list two times."
+    ],
+    "checked": 1
+   }
+  },
+  {
+   "name": "an empty scene list is incomplete",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: []\n---\n",
+     "files": {},
+     "outputText": "Alpha.\n"
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "errors": [
+     "The scene list is empty."
+    ]
+   }
+  },
+  {
+   "name": "a compiled note that is also a scene is incomplete",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Scenes/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [Manuscript]\n---\n",
+     "files": {
+      "Novel/Scenes/Manuscript.md": "Alpha.\n"
+     },
+     "outputText": "Alpha.\n"
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "errors": [
+     "The compiled note \"Novel/Scenes/Manuscript.md\" is also a scene."
+    ]
+   }
+  },
+  {
+   "name": "missing files and unmatched text give incomplete, not mismatch",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A, B]\n---\n",
+     "files": {
+      "Novel/Scenes/A.md": "Alpha.\n\nGone.\n"
+     },
+     "outputText": "Alpha.\n"
+    }
+   ],
+   "expected": {
+    "status": "incomplete",
+    "unmatched": [
+     [
+      "Gone.",
+      1,
+      1,
+      0,
+      [
+       "Novel/Scenes/A.md:3"
+      ],
+      false,
+      null
+     ]
+    ]
+   }
+  },
+  {
+   "name": "sceneFolder slash means the folder of the index",
+   "args": [
+    {
+     "indexPath": "Novel/Index.md",
+     "outputPath": "Novel/Manuscript.md",
+     "indexText": "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: /\n  scenes: [A]\n---\n",
+     "files": {
+      "Novel/A.md": "Alpha.\n"
+     },
+     "outputText": "Alpha.\n"
+    }
+   ],
+   "expected": {
+    "status": "pass",
+    "scenes": [
+     "Novel/A.md"
+    ]
+   }
+  },
+  {
+   "name": "parseSceneOrder gives depth for nested scenes",
+   "function": "parseSceneOrder",
+   "args": [
+    "Novel/Index.md",
+    "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A, [B, [C]], D]\n---\n"
+   ],
+   "expected": {
+    "scenes": [
+     {
+      "name": "A",
+      "path": "Novel/Scenes/A.md",
+      "depth": 0
+     },
+     {
+      "name": "B",
+      "path": "Novel/Scenes/B.md",
+      "depth": 1
+     },
+     {
+      "name": "C",
+      "path": "Novel/Scenes/C.md",
+      "depth": 2
+     },
+     {
+      "name": "D",
+      "path": "Novel/Scenes/D.md",
+      "depth": 0
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "parseSceneOrder resolves a parent folder",
+   "function": "parseSceneOrder",
+   "args": [
+    "Novel/Index.md",
+    "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: ../Shared/./Drafts\n  scenes: [A]\n---\n"
+   ],
+   "expected": {
+    "scenes": [
+     {
+      "name": "A",
+      "path": "Shared/Drafts/A.md",
+      "depth": 0
+     }
+    ],
+    "errors": []
+   }
+  },
+  {
+   "name": "parseSceneOrder refuses a folder outside the vault",
+   "function": "parseSceneOrder",
+   "args": [
+    "Novel/Index.md",
+    "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: ../../Out\n  scenes: [A]\n---\n"
+   ],
+   "expected": {
+    "scenes": [],
+    "errors": [
+     "The sceneFolder \"../../Out\" is outside the vault."
+    ]
+   }
+  },
+  {
+   "name": "parseSceneOrder reports a scene that is not a name",
+   "function": "parseSceneOrder",
+   "args": [
+    "Novel/Index.md",
+    "---\nlongform:\n  format: scenes\n  title: Novel\n  sceneFolder: Scenes\n  scenes: [A, {x: 1}]\n---\n"
+   ],
+   "expected": {
+    "scenes": [
+     {
+      "name": "A",
+      "path": "Novel/Scenes/A.md",
+      "depth": 0
+     }
+    ],
+    "errors": [
+     "The scene at position 2 is not a scene name."
+    ]
+   }
+  },
+  {
+   "name": "reportPath uses the base name when it is free",
+   "function": "reportPath",
+   "args": [
+    "Novel",
+    "Compile check Manuscript 2026-10-13 0930",
+    [
+     "Novel/Manuscript.md"
+    ]
+   ],
+   "expected": "Novel/Compile check Manuscript 2026-10-13 0930.md"
+  },
+  {
+   "name": "reportPath picks a new name when the path exists",
+   "function": "reportPath",
+   "args": [
+    "Novel",
+    "Compile check Manuscript 2026-10-13 0930",
+    [
+     "Novel/Compile check Manuscript 2026-10-13 0930.md",
+     "Novel/Compile check Manuscript 2026-10-13 0930 2.md"
+    ]
+   ],
+   "expected": "Novel/Compile check Manuscript 2026-10-13 0930 3.md"
+  },
+  {
+   "name": "reportPath replaces characters that a file name cannot hold",
+   "function": "reportPath",
+   "args": [
+    "",
+    "Compile check A/B: draft",
+    []
+   ],
+   "expected": "Compile check A-B- draft.md"
+  },
+  {
+   "name": "splitParagraphs keeps the first line of each paragraph",
+   "function": "splitParagraphs",
+   "args": [
+    "---\na: 1\n---\n\nOne\ntwo\n\n\nThree\n"
+   ],
+   "expected": [
+    {
+     "text": "One two",
+     "line": 5
+    },
+    {
+     "text": "Three",
+     "line": 9
+    }
+   ]
+  }
+ ]
+}
