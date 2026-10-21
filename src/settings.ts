@@ -3,6 +3,7 @@ import { sponsorsSettingItems } from './license/github-obsidian';
 import type { Status } from './check';
 import { PRO_UI, isPro } from './pro';
 import type CompileLossCheckPlugin from './main';
+import { helloSettingItems } from './hello/settings';
 
 /** Pro: a named comparison. One index, one or more compiled notes, and explicit exclusions. */
 export interface Profile {
@@ -86,6 +87,11 @@ export class CompileLossCheckSettingTab extends PluginSettingTab {
 	}
 
 	getSettingDefinitions(): SettingDefinitionItem[] {
+		// The product rows, then the "More from NoteMods" card (packages/hello).
+		return [...this.productSettingDefinitions(), ...helloSettingItems()];
+	}
+
+	productSettingDefinitions(): SettingDefinitionItem[] {
 		const n = this.plugin.settings.profiles.length;
 		return [
 			...(this.plugin.pro ? sponsorsSettingItems(this.plugin.pro, PRO_UI) : []),

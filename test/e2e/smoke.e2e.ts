@@ -12,6 +12,6 @@ describe(`${pluginId} smoke test`, function () {
 			const cmds = (app as unknown as { commands: { commands: Record<string, unknown> } }).commands.commands;
 			return Object.keys(cmds).filter((k) => k.startsWith(`${id}:`)).sort();
 		}, pluginId);
-		expect(ids).toEqual(['check', 'delete-profile', 'open-history', 'run-profile', 'save-profile'].map((c) => `${pluginId}:${c}`));
+		expect(ids).toEqual(['check', 'delete-profile', 'open-history', 'run-profile', 'save-profile', 'send-feedback', 'show-whats-new'].map((c) => `${pluginId}:${c}`));
 	});
 });

@@ -24,7 +24,7 @@ The comparison is strict. Curly quotes in place of straight quotes, or two parag
 
 ### Pick the index and the compiled note
 
-Run "Check a compiled manuscript" from the command palette. The first list shows the notes that have a `longform` property in their frontmatter. The second list shows the other Markdown notes, so you can select the compiled manuscript.
+The first list shows the notes that have a `longform` property in their frontmatter. The second list shows the other Markdown notes, so you can select the compiled manuscript.
 
 Scenes come from `sceneFolder` and `scenes` in the index. A nested list such as `[A, [B], C]` puts B under A, and the check reads A, B and C in that order.
 
@@ -56,12 +56,9 @@ One profile can hold more than one compiled note, for example a print version an
 
 ## Install
 
-Install the files that the maintainer supplies:
+Open Settings, then Community plugins, then Browse, and search for "Compile Loss Check". Select Install, then Enable.
 
-1. Make the folder `.obsidian/plugins/compile-loss-check/` in your vault.
-2. Copy `main.js`, `manifest.json` and `styles.css` into that folder.
-3. In Obsidian, open Settings, then Community plugins, and turn off Restricted mode.
-4. Reload Obsidian, then enable Compile Loss Check in the list of installed plugins.
+To install by hand, put `main.js`, `manifest.json` and `styles.css` from the latest release in `<vault>/.obsidian/plugins/compile-loss-check/`. Reload the community plugins, then turn on Compile Loss Check.
 
 The plugin needs Obsidian 1.13.4 or later.
 
@@ -85,6 +82,8 @@ Without Pro, these commands show a notice and change nothing.
 
 ## Settings
 
+After a minor or major update, this plugin opens one What's new tab in the background. The tab and settings card suggest other NoteMods plugins and Zovo Chat and link to notemods.com for feedback ([privacy](https://notemods.com/privacy/)). The tab sends no data. Turn the tab off in Settings.
+
 <img src="https://raw.githubusercontent.com/theluckystrike/compile-loss-check/HEAD/docs/settings.png" alt="The settings tab with the Pro section and the report folder" width="720">
 
 | Setting | What it does |
@@ -99,10 +98,6 @@ Profiles and the report history are saved in the plugin data of the vault.
 ### Why does the check report text that is in the manuscript?
 
 A changed quote mark, a changed dash, joined paragraphs or a changed word make a different text. Look at the hint under the paragraph in the report. Pro exclusions can skip text that you change on purpose.
-
-### Can it prove what text existed when I compiled?
-
-No. It reads the scenes as they are at the time of the check. It cannot see an earlier version.
 
 ### Does it change my notes?
 
