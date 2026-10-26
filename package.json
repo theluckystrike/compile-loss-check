@@ -1,7 +1,6 @@
 {
 	"name": "compile-loss-check",
-	"repository": {"type": "git", "url": "theluckystrike/compile-loss-check.git"},
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"private": true,
 	"description": "Find source paragraphs that do not match a compiled manuscript.",
 	"main": "main.js",

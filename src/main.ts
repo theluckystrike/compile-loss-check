@@ -2,7 +2,7 @@ import { Notice, Plugin, TFile, normalizePath, type TAbstractFile } from 'obsidi
 import type { SponsorsManager } from './license/index';
 import { createGitHubSponsors } from './license/github-obsidian';
 import { MAX_SCENES, checkCompile, fileStamp, parseSceneOrder, renderReport, reportPath, type CheckResult, type Exclusions } from './check';
-import { SPONSORS, bindPro, isPro, resetPro } from './pro';
+import { SPONSORS, bindPro, isPro, resetPro, proNotice } from './pro';
 import { DEFAULT_SETTINGS, CompileLossCheckSettingTab, HISTORY_MAX, normalizeSettings, type CompileLossCheckSettings, type Profile } from './settings';
 import { CheckModal, ListPickModal, NotePickModal, ProfileModal, historyLabel, profileLabel } from './ui';
 import { setupHello } from './hello/index';
@@ -27,7 +27,7 @@ export interface RunOutcome {
 }
 
 export function needsPro(feature: string): void {
-	new Notice(`${feature} is a pro feature. Sponsor on GitHub, then sign in from the plugin settings.`);
+	proNotice(`${feature} is a pro feature.`);
 }
 
 export default class CompileLossCheckPlugin extends Plugin {
