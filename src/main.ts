@@ -26,9 +26,13 @@ export interface RunOutcome {
 	reportError?: string;
 }
 
-export function needsPro(feature: string): void {
-	proNotice(`${feature} is a pro feature.`);
+/** Shows the Pro notice. The lead is a full sentence, for example 'Report history is a Pro feature.'. */
+export function needsPro(lead: string): void {
+	proNotice(lead);
 }
+
+export const PRO_PROFILES = 'Comparison profiles are a Pro feature.';
+export const PRO_HISTORY = 'Report history is a Pro feature.';
 
 export default class CompileLossCheckPlugin extends Plugin {
 	settings: CompileLossCheckSettings = { ...DEFAULT_SETTINGS };
@@ -214,7 +218,7 @@ export default class CompileLossCheckPlugin extends Plugin {
 	}
 
 	private saveProfileCommand(): void {
-		if (!isPro()) return needsPro('Comparison profiles');
+		if (!isPro()) return needsPro(PRO_PROFILES);
 		const last = this.last;
 		if (!last) {
 			new Notice('Run a check first. The profile uses the index and compiled note of the last check.');
@@ -241,7 +245,7 @@ export default class CompileLossCheckPlugin extends Plugin {
 	/** Pro: runs a profile with its exclusions against each of its compiled notes. */
 	async runProfile(p: Profile, withModal = true): Promise<RunOutcome | null> {
 		if (!isPro()) {
-			needsPro('Comparison profiles');
+			needsPro(PRO_PROFILES);
 			return null;
 		}
 		const opts = { exclusions: { texts: p.excludeTexts, paths: p.excludePaths }, profile: p.name };
@@ -249,12 +253,12 @@ export default class CompileLossCheckPlugin extends Plugin {
 	}
 
 	private runProfileCommand(): void {
-		if (!isPro()) return needsPro('Comparison profiles');
+		if (!isPro()) return needsPro(PRO_PROFILES);
 		new ListPickModal(this.app, this.settings.profiles, profileLabel, 'Select a profile', 'No saved profile.', (p) => void this.runProfile(p)).open();
 	}
 
 	private deleteProfileCommand(): void {
-		if (!isPro()) return needsPro('Comparison profiles');
+		if (!isPro()) return needsPro(PRO_PROFILES);
 		new ListPickModal(this.app, this.settings.profiles, profileLabel, 'Select a profile to delete', 'No saved profile.', (p) => {
 			this.settings.profiles = this.settings.profiles.filter((x) => x !== p);
 			void this.saveSettings();
@@ -263,7 +267,7 @@ export default class CompileLossCheckPlugin extends Plugin {
 	}
 
 	private historyCommand(): void {
-		if (!isPro()) return needsPro('Report history');
+		if (!isPro()) return needsPro(PRO_HISTORY);
 		const items = [...this.settings.history].reverse();
 		new ListPickModal(this.app, items, historyLabel, 'Select a report', 'No report in the history.', (h) => void this.openPath(h.reportPath)).open();
 	}

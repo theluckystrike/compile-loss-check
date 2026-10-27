@@ -1,7 +1,7 @@
 {
 	"id": "compile-loss-check",
 	"name": "Compile Loss Check",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"minAppVersion": "1.13.4",
 	"description": "Find source paragraphs that do not match a compiled manuscript.",
 	"author": "Michael Lip",

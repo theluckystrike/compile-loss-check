@@ -102,7 +102,7 @@ describe(`${pluginId} check in the app`, function () {
 		await browser.executeObsidianCommand(`${pluginId}:run-profile`);
 		await browser.waitUntil(async () => {
 			const texts = await browser.$$('.notice').map((n) => n.getText());
-			return texts.some((t) => t.includes('Comparison profiles is a pro feature.'));
+			return texts.some((t) => t.includes('Comparison profiles are a Pro feature.'));
 		}, { timeout: 20000, timeoutMsg: 'The Pro notice did not appear.' });
 	});
 });

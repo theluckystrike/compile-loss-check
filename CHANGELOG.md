@@ -1,5 +1,11 @@
 # compile-loss-check
 
+## 1.1.2
+
+### Patch Changes
+
+- de36552: The comparison profiles Pro notice now says that comparison profiles are a Pro feature. The report history Pro notice now writes Pro with a capital P.
+
 ## 1.1.1
 
 ### Patch Changes
