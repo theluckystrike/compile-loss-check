@@ -50,7 +50,7 @@ Save the last check as a named profile. A profile holds the index, the compiled 
 
 ### Several compiled notes and report history (Pro)
 
-One profile can hold more than one compiled note, for example a print version and an ebook version. A run checks each compiled note and writes one report with a section for each. When Pro is on, each check also adds an entry to the report history. Run "Open a report from the history" to find an earlier report by its date, profile and result. The history keeps the newest 200 entries.
+One profile can hold more than one compiled note, for example a print version and an ebook version. A run checks each compiled note and writes one report with a section for each. With Pro, each check also adds an entry to the report history. Run "Open a report from the history" to find an earlier report by its date, profile and result. The history keeps the newest 200 entries.
 
 <img src="https://raw.githubusercontent.com/theluckystrike/compile-loss-check/HEAD/docs/profile.png" alt="The result of one profile run with a section for each compiled note" width="720">
 
@@ -89,7 +89,7 @@ After a minor or major update, this plugin opens one What's new tab in the backg
 | Setting | What it does |
 | --- | --- |
 | Report folder | The folder for new reports. Empty puts each report next to its compiled note. The plugin makes the folder if it does not exist. |
-| Pro | Sign in with GitHub, the sponsorship status and the Sponsor button. |
+| Pro | GitHub sign in, sponsorship status and Sponsor button. |
 
 Profiles and the report history are saved in the plugin data of the vault.
 
@@ -114,6 +114,8 @@ The unit tests run on Node with a mock of the Obsidian API. The end-to-end tests
 ## Payment, account and network
 
 The core features are free. Pro features need a GitHub Sponsors sponsorship of theluckystrike: $5 a month or more, or $15 once. A total payment of $15 meets the payment requirement for Pro without further payment. Sign-in and the checks below still apply. Your notes stay readable and editable with or without Pro.
+
+[One payment turns on Pro in every NoteMods plugin](https://notemods.com/pro/).
 
 GitHub handles the payment. Sponsor at https://github.com/sponsors/theluckystrike?frequency=one-time&metadata_source=compile-loss-check. You need no account for the free features. Pro needs the GitHub account that sponsors.
 
