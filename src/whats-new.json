@@ -1,10 +1,9 @@
 {
 	"id": "compile-loss-check",
 	"name": "Compile Loss Check",
-	"version": "1.1.2",
+	"version": "1.1.3",
 	"changes": [
-		"The comparison profiles Pro notice now says that comparison profiles are a Pro feature.",
-		"The report history Pro notice now writes Pro with a capital P."
+		"The Pro notice of Compile Loss Check now says that one payment turns on Pro in every NoteMods plugin."
 	],
 	"tip": "With Pro, save the last check as a profile that skips chosen paragraph texts or scene paths in later runs.",
 	"thanks": "Hi, I am Michael, a solo developer in Poland. Compile Loss Check is one of over 100 small plugins that I make. Thank you for using it with your writing.",
